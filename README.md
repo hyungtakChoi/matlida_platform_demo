@@ -10,7 +10,8 @@
 현재 준비되어 있는 데이터는 PCB Defect, Brain tumor 두 종류입니다.
 data_names에는 pcb, brain 입력이 가능합니다.
 
-|------|---|
+|data name|reference|
+|------|-----|
 |brain tumor|https://www.kaggle.com/datasets/davidbroberts/brain-tumor-object-detection-datasets|
 |pcb defect|https://www.kaggle.com/datasets/akhatova/pcb-defects|
 
