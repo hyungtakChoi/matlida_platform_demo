@@ -3,11 +3,11 @@
 참고 : `https://github.com/zzh8829/yolov3-tf2.git`
 
 ## 실행
-모든 실행은 다음과 같습니다.
+다음 명령어를 통하여 yolov3 모델을 학습합니다.
 ```
 ./train_run.sh [data_names]
 ```
-현재 준비되어 있는 데이터는 PCB Defect, Brain tumor 두 종류입니다.
+현재 준비되어 있는 데이터는 PCB Defect, Brain tumor 두 종류입니다.   
 data_names에는 pcb, brain 입력이 가능합니다.
 
 |data name|reference|

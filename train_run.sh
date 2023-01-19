@@ -1,20 +1,17 @@
-if [[ "$#" -gt 2 ||  "$#" -lt 2 ]]; then
-  echo "Usage: $0 DATASET_NAME DATA_DIR"
+if [[ "$#" -gt 1 ||  "$#" -lt 1 ]]; then
+  echo "Usage: $0 DATASET_NAME"
   exit
 fi
 
-TRAINING_DATA_DIR=$1
-VALIDATION_DATA_DIR=$2
+DATASET_NAME=$1
+echo "run generation ${DATASET_NAME} detection model"
 
 echo 'env settings ... '
-
 pip install -r requirements.txt
-
-
 
 if [ $? -eq 0 ];then
 
-  if [$1 -eq "pcb"]; then
+  if [[ "$1" =~ pcb ]]; then
 
     echo 'download yolov3 weights ... '
     mkdir data
@@ -22,43 +19,50 @@ if [ $? -eq 0 ];then
     python convert.py --weights ./data/yolov3.weights --output ./checkpoints/yolov3.tf
 
     echo 'download pcb dataset'
-    mkdir pcb_dataset
-    gdown https://drive.google.com/uc?id=1qn0mLFV7NBbmw6-ZTuF_tN_oJxRHx-XR -O ./pcb_dataset/pcb_dataset.tfrecord
-    gdown https://drive.google.com/uc?id=1ReribxK5PHjC6cKPVMTRX1dIP3qIt7PF -O ./pcb_dataset/pcb.names
+    gdown https://drive.google.com/drive/folders/1ES9wMg9S0lmuy084-zFWc3Tbd8RTwIWx?usp=share_link --folder -O ./pcb_dataset
 
-    echo 'start train ... '
+    echo 'start pcb defect detection model train ... '
     python train.py \
         --names pcb \
         --batch_size 8 \
         --dataset ./pcb_dataset/pcb_dataset.tfrecord \
         --epochs 2 --classes ./pcb_dataset/pcb.names \
-        --num_classes 6 \
+        --num_classes 6 --size 416 \
         --mode eager_tf \
         --transfer darknet \
         --weights ./checkpoints/yolov3.tf \
-        --output ./pcb_model \
+        --output ./pcb_defect_model \
         --weights_num_classes 80
 
-  elif [$1 -eq "brain"]; then
+  elif [[ "$1" =~ brain ]]; then
 
-    echo 'download pretrained weights ... '
-    
-    echo 'start train ... '
+    echo 'download yolov3 weights ... '
+    mkdir data
+    wget https://pjreddie.com/media/files/yolov3.weights -O data/yolov3.weights
+    python convert.py --weights ./data/yolov3.weights --output ./checkpoints/yolov3.tf
+
+    echo 'download pretrained weights and dataset ... '
+    gdown https://drive.google.com/drive/folders/1DTLqPKm-eypYlyD54s-sEkcL-yGCPsyo?usp=share_link --folder -O ./brain_dataset
+
+    echo 'start brain tumor detection model train ... '
     python train.py \
-        --names 
+        --names brain \
         --batch_size 8 \
-        --dataset ./pcb_dataset/pcb_dataset.tfrecord \
-        --epochs 2 --classes ./pcb_dataset/pcb.names \
-        --num_classes 6 \
+        --dataset ./brain_dataset/axial_brain_train.tfrecord  \
+        --val_dataset ./brain_dataset/axial_brain_val.tfrecord
+        --epochs 2 --size 256 \
+        --classes ./brain_dataset/class.txt \
+        --num_classes 2 \
         --mode eager_tf \
         --transfer darknet \
         --weights ./checkpoints/yolov3.tf \
-        --output ./pcb_model \
+        --output ./brain_tumor_model \
         --weights_num_classes 80
 
   else
     echo "please input dataset name [pcb, brain]"
     exit 9
+  fi
 
 else
   echo "install failed"
